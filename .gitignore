@@ -1,0 +1,20 @@
+# build output
+build/
+out/
+*.exe
+*.o
+*.obj
+*.a
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# generated test data (recreate it with tools/generate_data.py)
+data/generated/
+
+# never commit secrets or real student data
+.env
+*.log
