@@ -19,7 +19,8 @@ FIRST = ["Ali", "Ayesha", "Bilal", "Fatima", "Hamza", "Hira", "Imran", "Maryam",
          "Sana", "Usman", "Zainab", "Taha", "Noor", "Hassan", "Iqra", "Rayyan", "Laiba"]
 LAST = ["Khan", "Ahmed", "Malik", "Sheikh", "Butt", "Raza", "Qureshi", "Siddiqui", "Mirza",
         "Chaudhry", "Hussain", "Javed", "Aslam", "Farooq", "Nawaz", "Baig"]
-SLOTS = ["09:00-12:00", "13:00-16:00"]
+EXAM_DAY = "2026-12-10"
+WINDOW = f"{EXAM_DAY} 08:00-13:00"   # contains the exam slot 09:00-12:00
 
 
 def write(path, header, rows):
@@ -42,10 +43,10 @@ def make_set(out, n_students, n_rooms, n_courses, seed, n_invigilators=None):
         rows, cols = rng.choice([(5, 6), (6, 6), (6, 8), (8, 8), (7, 7)])
         rooms.append((f"Room-{i:02d}", rows, cols, rng.choice(["LectureHall", "ComputerLab"])))
     n_inv = n_invigilators if n_invigilators is not None else max(1, n_rooms + n_rooms // 4)
-    inv = [(f"I{i:03d}", f"Dr. {rng.choice(FIRST)} {rng.choice(LAST)}", SLOTS[0]) for i in range(1, n_inv + 1)]
+    inv = [(f"I{i:03d}", f"Dr. {rng.choice(FIRST)} {rng.choice(LAST)}", WINDOW) for i in range(1, n_inv + 1)]
     write(os.path.join(out, "students.csv"), ["roll_no", "name", "course"], students)
     write(os.path.join(out, "rooms.csv"), ["room", "rows", "cols", "type"], rooms)
-    write(os.path.join(out, "invigilators.csv"), ["id", "name", "slot"], inv)
+    write(os.path.join(out, "invigilators.csv"), ["id", "name", "slots"], inv)
 
 
 def raw(path, text):
@@ -56,7 +57,7 @@ def raw(path, text):
 
 S_HEAD = "roll_no,name,course\n"
 R_OK = "room,rows,cols,type\nRoom-01,5,6,LectureHall\n"
-I_OK = "id,name,slot\nI001,Dr. Khan,09:00-12:00\n"
+I_OK = "id,name,slots\nI001,Dr. Khan,2026-12-10 08:00-13:00\n"
 
 
 def edge_cases(base):
@@ -90,6 +91,12 @@ def edge_cases(base):
         "14_fewer_invigilators_than_rooms": (S_HEAD + "".join(f"S{i},Student {i},{'CS' if i % 2 else 'MA'}\n" for i in range(1, 13)),
                                              "room,rows,cols,type\nA,2,3,LectureHall\nB,2,3,LectureHall\n", I_OK,
                                              "2 rooms, 1 invigilator in the same slot. Report the unstaffed room."),
+        "15_invalid_slot_format": (S_HEAD + "S1,Ali Khan,CS\n", R_OK,
+                                   "id,name,slots\nI001,Dr. Khan,10am-12pm\nI002,Dr. Raza,2026-12-10 08:00-13:00\nI003,Dr. Ali,2026-02-30 08:00-13:00\n",
+                                   "I001 and I003 rejected with the TimeSlot error text as the reason. I002 loads."),
+        "16_invigilator_not_available": (S_HEAD + "S1,Ali Khan,CS\n", R_OK,
+                                         "id,name,slots\nI001,Dr. Khan,2026-12-11 08:00-13:00\nI002,Dr. Raza,2026-12-10 10:00-13:00\n",
+                                         "Exam slot is 2026-12-10 09:00-12:00. Neither invigilator covers it fully. Report the unstaffed room, no crash."),
     }
     for name, (s, r, i, expected) in cases.items():
         d = os.path.join(base, name)

@@ -1,28 +1,9 @@
-// Tiny test harness with no external library. (assert() is disabled in release builds,
-// so we use our own CHECK macro that always runs.)
-#include <iostream>
-#include <stdexcept>
-
+#include "check.h"
 #include "examseat/Invigilator.h"
 #include "examseat/Room.h"
 #include "examseat/Student.h"
 
 using namespace examseat;
-
-static int failures = 0;
-#define CHECK(cond)                                                              \
-    do {                                                                         \
-        if (!(cond)) {                                                           \
-            std::cout << "FAIL line " << __LINE__ << ": " #cond "\n";            \
-            ++failures;                                                          \
-        }                                                                        \
-    } while (0)
-
-template <typename F>
-static bool throwsInvalid(F f) {
-    try { f(); } catch (const std::invalid_argument&) { return true; } catch (...) {}
-    return false;
-}
 
 int main() {
     // --- Person / Student / Invigilator ---
@@ -77,6 +58,12 @@ int main() {
     CHECK(Room::maxSeatsForOneCourse(3, 3) == 5);
     CHECK(Room::maxSeatsForOneCourse(0, 5) == 0);
 
-    if (failures == 0) std::cout << "All tests passed\n";
-    return failures == 0 ? 0 : 1;
+    // --- normalisation: ids trimmed and upper-cased, courses upper-cased ---
+    Student messy("  s1 ", " Ali Khan ", " cs ");
+    CHECK(messy.id() == "S1");
+    CHECK(messy.name() == "Ali Khan");
+    CHECK(messy.course() == "CS");
+    CHECK(throwsInvalid([] { Student("   ", "Ali", "CS"); }));
+
+    return finish("core");
 }

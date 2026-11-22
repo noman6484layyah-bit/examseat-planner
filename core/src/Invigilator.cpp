@@ -1,3 +1,11 @@
 #include "examseat/Invigilator.h"
 
-// Intentionally empty for now. Free time slots and duty counts go here in Phase 1.
+namespace examseat {
+
+bool Invigilator::isAvailableFor(const TimeSlot& slot) const {
+    for (const TimeSlot& window : availability_)
+        if (window.contains(slot)) return true;
+    return false;
+}
+
+}  // namespace examseat
