@@ -3,10 +3,12 @@
 #include <stdexcept>
 #include <utility>
 
+#include "examseat/StringUtil.h"
+
 namespace examseat {
 
 Room::Room(std::string name, int rows, int cols)
-    : name_(std::move(name)), rows_(rows), cols_(cols) {
+    : name_(trim(name)), rows_(rows), cols_(cols) {
     if (name_.empty()) throw std::invalid_argument("Room: name must not be empty");
     if (rows <= 0 || cols <= 0)
         throw std::invalid_argument("Room: rows and cols must be positive");

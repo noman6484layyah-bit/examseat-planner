@@ -4,17 +4,17 @@ A C++ program that builds exam seating plans and assigns invigilators automatica
 Rule example: no two students of the same course sit next to each other.
 If no valid plan exists, it explains why instead of crashing.
 
-> Status: **Phase 0 (setup)**. Core classes and tests exist; the placement engine is next.
+> Status: **Phase 0 (setup) done.** Shared classes, the specification and tests exist. Next: CSV reader and placement engine.
 
 ## Build and run
 
 Requires: a C++17 compiler (g++), CMake 3.16+, Python 3 (for test data only).
 
 ```bash
-# Windows (MinGW):
-cmake -S . -B build -G "MinGW Makefiles"
-# Linux / macOS:
-# cmake -S . -B build
+# Windows (MSYS2 g++ with Ninja):
+cmake -S . -B build -G Ninja
+# Windows with make instead:  cmake -S . -B build -G "MinGW Makefiles"
+# Linux / macOS:              cmake -S . -B build
 
 cmake --build build
 ctest --test-dir build --output-on-failure     # run the tests
@@ -27,7 +27,7 @@ ctest --test-dir build --output-on-failure     # run the tests
 python tools/generate_data.py --edge      # writes data/generated/ (normal sets + edge cases)
 ```
 
-Each folder in `data/generated/edge/` has an `EXPECTED.txt` saying what the program must do.
+Each of the 16 folders in `data/generated/edge/` has an `EXPECTED.txt` saying what the program must do.
 
 ## Project layout
 
@@ -37,6 +37,7 @@ Each folder in `data/generated/edge/` has an `EXPECTED.txt` saying what the prog
 | `console_app/` | The console menu that calls `core`. |
 | `tests/` | Automated tests (`ctest`). |
 | `tools/` | Test-data generator. |
+| `docs/` | `SPEC.md`: file formats and rules. Read it before writing code. |
 | `data/sample/` | Small sample files committed to the repo. |
 
 ## Team workflow
